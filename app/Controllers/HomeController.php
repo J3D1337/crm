@@ -1,12 +1,17 @@
-<?php 
+<?php
 
 namespace App\Controllers;
 
-class HomeController extends Controller{
+class HomeController extends Controller
+{
+    public function index()
+    {
+        $data = [
+            'title' => 'Welcome to the Home Page',
+            'message' => 'This is the home page of your MVC application!'
+        ];
 
-    public function index() {
-        $model = $this->model('Model');
-        $message = $model->getData();
-        $this->view('home', ['message' => $message]);
+        // Render the home view and pass data to it
+        $this->render('home', $data);
     }
 }

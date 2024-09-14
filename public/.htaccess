@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the request is for an existing file or directory, allow it.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Otherwise, route the request to index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Block access to directories like app/, core/, config/, and vendor/
+<FilesMatch "^(\.env|composer\.(json|lock))$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

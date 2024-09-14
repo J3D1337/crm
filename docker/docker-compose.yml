@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # PHP and Apache container
+  app:
+    build:
+      context: ./php
+    container_name: mvc_php_apache
+    volumes:
+      - /c/xampp/htdocs/PersonalProjects/ClientCRM:/var/www/html                   # Map your local XAMPP directory to the Docker container
+      - ./apache/apache.conf:/etc/apache2/sites-enabled/000-default.conf  # Link custom Apache config
+    networks:
+      - mvc_network
+    ports:
+      - "8080:80"                           # Expose port 80 to 8080
+    depends_on:
+      - db
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=mvc_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=secret
+
+  # Database service (MySQL)
+  db:
+    image: mysql:5.7
+    container_name: mvc_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: crm
+    volumes:
+      - db_data:/var/lib/mysql              # Persistent MySQL data
+    ports:
+      - "3306:3306"
+    networks:
+      - mvc_network
+
+networks:
+  mvc_network:
+    driver: bridge
+
+volumes:
+  db_data:
