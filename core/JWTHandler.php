@@ -1,5 +1,9 @@
 <?php
+namespace Core;
+
 use \Firebase\JWT\JWT;  // Use Firebase JWT library (make sure you have it installed via Composer)
+use Exception;
+
 
 class JWTHandler
 {

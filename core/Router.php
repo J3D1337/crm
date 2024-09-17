@@ -1,8 +1,16 @@
 <?php
 
+namespace Core;
+
 class Router
 {
     private $routes = [];
+    private $db;  // Add a property to store the PDO instance
+
+    public function __construct($db)
+    {
+        $this->db = $db;  // Store the PDO instance
+    }
 
     // Register a GET route
     public function get($path, $callback)
@@ -22,7 +30,6 @@ class Router
         $path = $this->getPath();
         $method = $_SERVER['REQUEST_METHOD'];
 
-        // Check if the requested route exists
         $callback = $this->routes[$method][$path] ?? false;
 
         if (!$callback) {
@@ -31,22 +38,12 @@ class Router
             exit;
         }
 
-        // If callback is an array (e.g., [HomeController::class, 'index']), call the controller's method
+        // If the callback is a controller@method
         if (is_array($callback)) {
-            $controller = new $callback[0];  // Instantiate the controller
-            $method = $callback[1];  // Get the method name
-
-            if (!method_exists($controller, $method)) {
-                http_response_code(500);
-                echo "Method $method not found in controller " . get_class($controller);
-                exit;
-            }
-
-            // Call the controller method with instantiated controller
-            return call_user_func([$controller, $method]);
+            return $this->executeController($callback);
         }
 
-        // Call closure/function directly
+        // If the callback is a Closure or function
         return call_user_func($callback);
     }
 
@@ -54,10 +51,26 @@ class Router
     private function getPath()
     {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
-        $position = strpos($path, '?'); // To remove query string if present
+        $position = strpos($path, '?'); // Remove query string
         if ($position !== false) {
             $path = substr($path, 0, $position);
         }
         return $path;
+    }
+
+    // Method to execute the controller's method
+    private function executeController($callback)
+    {
+        [$controllerClass, $method] = $callback;
+
+        // Instantiate the controller and pass the $db instance
+        $controller = new $controllerClass($this->db);
+
+        if (!method_exists($controller, $method)) {
+            echo "Method $method not found in controller " . get_class($controller);
+            exit;
+        }
+
+        return call_user_func([$controller, $method]);
     }
 }

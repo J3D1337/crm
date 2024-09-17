@@ -25,6 +25,10 @@ class ComposerStaticInitb346e80a1dcf0546da0ab36af49c0ced
             'Doctrine\\Instantiator\\' => 22,
             'DeepCopy\\' => 9,
         ),
+        'C' => 
+        array (
+            'Core\\' => 5,
+        ),
         'A' => 
         array (
             'App\\' => 4,
@@ -47,6 +51,10 @@ class ComposerStaticInitb346e80a1dcf0546da0ab36af49c0ced
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'Core\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/core',
         ),
         'App\\' => 
         array (

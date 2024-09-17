@@ -1,37 +1,99 @@
 <?php
-require_once __DIR__ . '/../../core/JWTHandler.php';
 
-class AuthController
+namespace App\Controllers;
+
+use App\Models\User;
+use Core\JWTHandler;
+
+class AuthController extends Controller
 {
     private $jwt;
+    private $userModel;
 
-    public function __construct()
+    public function __construct($db)
     {
         $this->jwt = new JWTHandler();
+        $this->userModel = new User($db);
     }
 
-    // Simulate login and return JWT token
-    public function login()
+    // Handle user registration (GET and POST)
+    public function register()
     {
-        // Normally, you'd verify the username and password from the request
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        if ($this->isGet()) {
+            // Render the registration view for GET requests
+            $this->render('register');
+            return;
+        }
 
-        // For testing, we'll assume the login is successful if username and password are not empty
-        if (!empty($username) && !empty($password)) {
-            // Assuming user ID is 123 for the logged-in user
-            $userId = 123;
-            $token = $this->jwt->generateToken($userId);
+        // Handle POST request (form submission)
+        if ($this->isPost()) {
+            $name = $this->getInput('name');
+            $email = $this->getInput('email');
+            $password = $this->getInput('password');
 
-            echo json_encode([
-                'status' => 'success',
-                'token' => $token
-            ]);
+            // Check if the email is already registered
+            if ($this->userModel->findByEmail($email)) {
+                // Re-render the register view with an error message
+                $this->render('register', [
+                    'error' => 'Email already registered'
+                ]);
+                return;
+            } elseif (empty($name) || empty($email) || empty($password)) {
+                // Re-render the register view with an error message
+                $this->render('register', [
+                    'error' => 'All fields are required'
+                ]);
+                return;
+            }
+
+            // Register the user and redirect on success
+            $this->userModel->register($name, $email, $password);
+            $this->redirect('/login');  // Redirect to login page after successful registration
+        }
+    }
+
+    // Handle user login (GET and POST)
+    public function login()
+{
+    if ($this->isGet()) {
+        // Render the login view for GET requests
+        $this->render('login');
+        return;
+    }
+
+    // Handle POST request (form submission)
+    if ($this->isPost()) {
+        $email = $this->getInput('email');
+        $password = $this->getInput('password');
+
+        $user = $this->userModel->findByEmail($email);
+
+        // Check credentials
+        if ($user && $this->userModel->verifyPassword($password, $user['password'])) {
+            // Store user information in the session after successful login
+            session_start();
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email']
+            ];
+
+            // Redirect to the dashboard or homepage
+            $this->redirect('/');  // Change to the actual route you want to redirect to
         } else {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Invalid credentials'
+            // Re-render the login view with an error message
+            $this->render('login', [
+                'error' => 'Invalid credentials'
             ]);
         }
+    }
+}
+
+    public function logout()
+    {
+        // Destroy the session and redirect to the login page
+        session_start();
+        session_destroy();
+        $this->redirect('/login');
     }
 }

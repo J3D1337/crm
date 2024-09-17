@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../../core/JWTHandler.php';
+// require_once __DIR__ . '/../../core/JWTHandler.php';
+namespace App\Controllers;
+
+use Core\JWTHandler;
 
 class ProtectedController
 {
