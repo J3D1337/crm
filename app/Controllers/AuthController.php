@@ -70,16 +70,16 @@ class AuthController extends Controller
 
         // Check credentials
         if ($user && $this->userModel->verifyPassword($password, $user['password'])) {
-            // Store user information in the session after successful login
-            session_start();
+            // Store user information in session, including role
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'name' => $user['name'],
-                'email' => $user['email']
+                'email' => $user['email'],
+                'role' => $user['role'], // Include role here
             ];
 
-            // Redirect to the dashboard or homepage
-            $this->redirect('/');  // Change to the actual route you want to redirect to
+            // Redirect to homepage or dashboard
+            $this->redirect('/');
         } else {
             // Re-render the login view with an error message
             $this->render('login', [
@@ -92,7 +92,6 @@ class AuthController extends Controller
     public function logout()
     {
         // Destroy the session and redirect to the login page
-        session_start();
         session_destroy();
         $this->redirect('/login');
     }
