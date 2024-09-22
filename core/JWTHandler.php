@@ -1,9 +1,8 @@
 <?php
 namespace Core;
 
-use \Firebase\JWT\JWT;  // Use Firebase JWT library (make sure you have it installed via Composer)
-use Exception;
-
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class JWTHandler
 {
@@ -11,33 +10,29 @@ class JWTHandler
 
     public function __construct()
     {
-        $this->secretKey = getenv('JWT_SECRET_KEY') ?: 'your_secret_key';  // Get secret key from .env or fallback to a default value
+        $this->secretKey = 'your-secret-key'; // Replace with your actual secret key
     }
 
-    // Generate a JWT token
-    public function generateToken($userId)
+    // Create JWT token
+    public function createToken($data)
     {
-        $issuedAt = time();
-        $expirationTime = $issuedAt + 3600;  // Token is valid for 1 hour
-
         $payload = [
-            'iat' => $issuedAt,
-            'exp' => $expirationTime,
-            'userId' => $userId
+            'iss' => 'your-app-name', // Issuer
+            'iat' => time(),           // Issued at time
+            'exp' => time() + 3600,    // Expiration time (1 hour)
+            'data' => $data            // User data
         ];
 
-        // Encode the payload to generate the token
         return JWT::encode($payload, $this->secretKey, 'HS256');
     }
 
-    // Validate and decode a JWT token
+    // Validate JWT token
     public function validateToken($token)
     {
         try {
-            $decoded = JWT::decode($token, $this->secretKey, ['HS256']);
-            return (array) $decoded;  // Return the decoded token as an array
-        } catch (Exception $e) {
-            return false;  // Token is invalid
+            return JWT::decode($token, new Key($this->secretKey, 'HS256'));
+        } catch (\Exception $e) {
+            return false; // Invalid token
         }
     }
 }

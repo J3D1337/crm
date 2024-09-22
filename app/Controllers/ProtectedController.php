@@ -1,5 +1,4 @@
 <?php
-// require_once __DIR__ . '/../../core/JWTHandler.php';
 namespace App\Controllers;
 
 use Core\JWTHandler;
@@ -16,14 +15,10 @@ class ProtectedController
     // Protected route that requires a valid JWT token
     public function index()
     {
-        // Get the Authorization header (Bearer Token)
-        $headers = apache_request_headers();
-        $authHeader = $headers['Authorization'] ?? '';
+        // Get the JWT token from cookies
+        $token = $_COOKIE['token'] ?? null;
 
-        // Check if a Bearer token is present
-        if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            $token = $matches[1];
-
+        if ($token) {
             // Validate the token
             $decoded = $this->jwt->validateToken($token);
 
@@ -44,7 +39,7 @@ class ProtectedController
             http_response_code(401);
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Authorization header missing'
+                'message' => 'JWT token missing in cookies'
             ]);
         }
     }
