@@ -1,12 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>MVC CRM</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Prevent back navigation from showing cached pages -->
+  <script type="text/javascript">
+    // Force a page reload when navigating back
+    window.onpageshow = function(event) {
+      if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+        // If the page is loaded from cache, reload it
+        window.location.reload();
+      }
+    };
+  </script>
+
 </head>
 <body>
 
@@ -14,12 +25,12 @@
   <div class="container-fluid">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <?php if (isset($_SESSION['user'])): ?>
+        <?php if (isset($jwtUser)): ?>
           <!-- Show logout button and user's name if logged in -->
           <a class="nav-link" href="#">
-            <?= htmlspecialchars($_SESSION['user']['name']) ?>  <!-- User's name -->
+            <?= htmlspecialchars($jwtUser['name']) ?>  <!-- Display username -->
           </a>
-          <a class="nav-link" href="/logout">Logout</a>
+          <a class="nav-link" href="/logout">Logout</a>  <!-- Logout link -->
         <?php else: ?>
           <!-- Default state when not logged in -->
           <a class="nav-link" href="/login">Login</a>
@@ -27,10 +38,7 @@
         <?php endif; ?>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Link 2</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link 3</a>
+        <a class="nav-link" href="/products">Products</a>
       </li>
     </ul>
   </div>

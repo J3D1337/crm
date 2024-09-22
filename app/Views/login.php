@@ -21,5 +21,7 @@
 
         <button type="submit">Login</button>
     </form>
+    <a href="/register">Register</a>
+    <a href="/">Home</a>    
 </body>
 </html>

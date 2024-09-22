@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\User;
@@ -20,35 +19,27 @@ class AuthController extends Controller
     public function register()
     {
         if ($this->isGet()) {
-            // Render the registration view for GET requests
             $this->render('register');
             return;
         }
 
-        // Handle POST request (form submission)
         if ($this->isPost()) {
             $name = $this->getInput('name');
             $email = $this->getInput('email');
             $password = $this->getInput('password');
 
-            // Check if the email is already registered
             if ($this->userModel->findByEmail($email)) {
-                // Re-render the register view with an error message
-                $this->render('register', [
-                    'error' => 'Email already registered'
-                ]);
+                $this->render('register', ['error' => 'Email already registered']);
                 return;
             } elseif (empty($name) || empty($email) || empty($password)) {
-                // Re-render the register view with an error message
-                $this->render('register', [
-                    'error' => 'All fields are required'
-                ]);
+                $this->render('register', ['error' => 'All fields are required']);
                 return;
             }
 
-            // Register the user and redirect on success
+            // Register the user
             $this->userModel->register($name, $email, $password);
-            $this->redirect('/login');  // Redirect to login page after successful registration
+
+            $this->redirect('/login');
         }
     }
 
@@ -56,43 +47,44 @@ class AuthController extends Controller
     public function login()
 {
     if ($this->isGet()) {
-        // Render the login view for GET requests
         $this->render('login');
         return;
     }
 
-    // Handle POST request (form submission)
     if ($this->isPost()) {
         $email = $this->getInput('email');
         $password = $this->getInput('password');
 
         $user = $this->userModel->findByEmail($email);
 
-        // Check credentials
         if ($user && $this->userModel->verifyPassword($password, $user['password'])) {
-            // Store user information in session, including role
-            $_SESSION['user'] = [
+            // Create JWT token
+            $token = $this->jwt->createToken([
                 'id' => $user['id'],
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'role' => $user['role'], // Include role here
-            ];
+                'role' => $user['role']
+            ]);
 
-            // Redirect to homepage or dashboard
+            // Set the token in a cookie (optional, depends on how you want to store the token)
+            setcookie('token', $token, time() + 3600, '/');
+
+            // Redirect to homepage
             $this->redirect('/');
         } else {
-            // Re-render the login view with an error message
-            $this->render('login', [
-                'error' => 'Invalid credentials'
-            ]);
+            $this->render('login', ['error' => 'Invalid credentials']);
         }
     }
 }
 
+
+    // Handle logout
     public function logout()
-    {
-        // Destroy the session and redirect to the login page
-        session_destroy();
-        $this->redirect('/login');
-    }
+{
+    // Delete the JWT token by setting the cookie to expire in the past
+    setcookie('token', '', time() - 3600, '/');
+
+    // Redirect to the login page after logout
+    $this->redirect('/login');
+}
 }
